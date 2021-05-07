@@ -1,6 +1,26 @@
 <?php
+include_once 'config/config.php';
+include_once 'helpers/Database.php';
+include_once 'helpers/functions.php';
+include_once 'models/Visitor.php';
 
-
+$conn = Database::connectDatabase($config);
+$visitor = new Visitor($conn);
+$ip = getIPAddress();
+$url = getUrl();
+$user_agent = $_SERVER['HTTP_USER_AGENT'];
+$visitor->ip_address = $ip;
+$visitor->user_agent = $user_agent;
+$visitor->page_url = $url;
+//
+$visitor_get = $visitor->one($ip, $user_agent, $url);
+//
+if($visitor_get){
+    $visitor->views_count = (int)$visitor_get['views_count']+ 1;
+    $visitor->update();
+}else{
+    $visitor->save();
+}
 
 
 $my_img = imagecreate(400, 80);
